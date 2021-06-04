@@ -306,4 +306,5 @@ void MainWindow::on_Girar_clicked()
   //serialPort->waitForReadyRead(100);
  QThread::msleep(100);
   read_Data();*/
+  // coment
 }
