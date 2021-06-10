@@ -309,9 +309,12 @@ void MainWindow::on_Girar_clicked()
   }
   //ui->verticalSlider_vel_R->setValue(100);
   //ui->verticalSlider_vel_L->setValue(100);
-    write_Data();
+    write_Data(); // comando para girar
     QThread::sleep(1); // 1 seg de pause
     read_Data();
+    ui->verticalSlider_vel_L->setValue(0);
+    ui->verticalSlider_vel_R->setValue(0);
+    write_Data(); // comando para parar
   //serialPort->waitForReadyRead(100);
   //QThread::msleep(5000);
 //  pthread_cond_wait()
