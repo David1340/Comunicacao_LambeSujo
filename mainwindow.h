@@ -82,6 +82,8 @@ private slots:
 
     void on_Girar_clicked();
 
+    void on_spinBox_texte_3_valueChanged(int arg1);
+
 public slots:
     void connectToSerial();
     void checkSerial();

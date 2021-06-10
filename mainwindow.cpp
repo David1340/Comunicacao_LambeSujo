@@ -156,12 +156,19 @@ void MainWindow::read_Data()
             const QString texto = read_buf;
             ui->lineEdit_2->setText(texto);
 
-            if(int(read_buf.at(2) >= 0)){
-                ui->spinBox_texte_2->setValue((int)read_buf.at(2));
+            if(int(read_buf.at(1) >= 0)){
+                ui->spinBox_texte_3->setValue((int)read_buf.at(1)); //Vel. Esq.
             }
             else{
-                ui->spinBox_texte_2->setValue(-(128 + (int)read_buf.at(2)));
-          }
+                ui->spinBox_texte_3->setValue(-(128 + (int)read_buf.at(1))); //Vel. Esq.
+            }
+
+            if(int(read_buf.at(2) >= 0)){
+                ui->spinBox_texte_2->setValue((int)read_buf.at(2)); //Vel. Dir.
+            }
+            else{
+                ui->spinBox_texte_2->setValue(-(128 + (int)read_buf.at(2))); //Vel. Dir.
+            }
         }
     }
 }
@@ -286,15 +293,27 @@ void MainWindow::on_spinBox_texte_2_valueChanged(int arg1)
 
 }
 
+void MainWindow::on_spinBox_texte_3_valueChanged(int arg1)
+{
+
+}
+
 void MainWindow::on_Girar_clicked()
 {
-  QThread::msleep(10);
-  ui->verticalSlider_vel_R->setValue(100);
-  ui->verticalSlider_vel_L->setValue(100);
-  write_Data();
-
+  //QThread::msleep(10);
+  if(ui->verticalSlider_vel_L->value()==0){
+      ui->verticalSlider_vel_L->setValue(100);
+  }
+  if(ui->verticalSlider_vel_R->value()==0){
+      ui->verticalSlider_vel_R->setValue(-100);
+  }
+  //ui->verticalSlider_vel_R->setValue(100);
+  //ui->verticalSlider_vel_L->setValue(100);
+    write_Data();
+    QThread::sleep(1); // 1 seg de pause
+    read_Data();
   //serialPort->waitForReadyRead(100);
-  QThread::msleep(5000);
+  //QThread::msleep(5000);
 //  pthread_cond_wait()
     /*
   serialPort->waitForBytesWritten(10);
@@ -306,5 +325,7 @@ void MainWindow::on_Girar_clicked()
   //serialPort->waitForReadyRead(100);
  QThread::msleep(100);
   read_Data();*/
-  // coment
+  // coment teste
 }
+
+
