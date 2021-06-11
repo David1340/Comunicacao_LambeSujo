@@ -6,7 +6,8 @@
 #include <QString>
 #include <QIODevice>
 #include <iostream>
-
+#include <time.h>
+#include <QTime>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -112,7 +113,7 @@ void MainWindow::write_Data()
 
     int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
     for(int i=0; i<11;i++){
-        write_buf[i] = C0;//C0; // ZERA O BUFFER DE ESCRITA INTEIRO
+        write_buf[i] = C0; // ZERA O BUFFER DE ESCRITA INTEIRO
     }
     write_buf[0] = (unsigned char) (250+index); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
     write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value());
@@ -132,6 +133,7 @@ void MainWindow::write_Data()
     }
 
     const QString texto = write_buf3;
+    //const QString texto = {(char)write_buf3.at(0),(char)write_buf3.at(1),(char)write_buf3.at(2),(char)write_buf3.at(3),(char)write_buf3.at(4),(char)write_buf3.at(5),(char)write_buf3.at(6),(char)write_buf3.at(7),(char)write_buf3.at(8),(char)write_buf3.at(9),(char)write_buf3.at(10)};
     ui->lineEdit->setText(texto);
 
     if(int(write_buf3.at(0) >= 0)){
@@ -303,17 +305,19 @@ void MainWindow::on_Girar_clicked()
   //QThread::msleep(10);
   if(ui->verticalSlider_vel_L->value()==0){
       ui->verticalSlider_vel_L->setValue(100);
+      ui->spinBox_vel_L->setValue(100);
   }
   if(ui->verticalSlider_vel_R->value()==0){
       ui->verticalSlider_vel_R->setValue(-100);
+      ui->spinBox_vel_R->setValue(-100);
   }
   //ui->verticalSlider_vel_R->setValue(100);
   //ui->verticalSlider_vel_L->setValue(100);
     write_Data(); // comando para girar
     QThread::sleep(1); // 1 seg de pause
     read_Data();
-    ui->verticalSlider_vel_L->setValue(0);
-    ui->verticalSlider_vel_R->setValue(0);
+    ui->verticalSlider_vel_L->setValue(0); ui->spinBox_vel_L->setValue(0);
+    ui->verticalSlider_vel_R->setValue(0); ui->spinBox_vel_R->setValue(0);
     write_Data(); // comando para parar
   //serialPort->waitForReadyRead(100);
   //QThread::msleep(5000);
