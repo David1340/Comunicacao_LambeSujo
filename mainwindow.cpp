@@ -138,10 +138,72 @@ void MainWindow::write_Data()
 
     if(int(write_buf3.at(0) >= 0)){
         ui->spinBox_texte->setValue((int)write_buf3.at(0));
+        ui->lcdNumber_id->display((int)write_buf3.at(0));
     }
     else{
         ui->spinBox_texte->setValue(-(128 + (int)write_buf3.at(0)));
         //ui->spinBox_texte->setValue((int)(unsigned char)write_buf3.at(1));
+        ui->lcdNumber_id->display(-(128 + (int)write_buf3.at(0)));
+    }
+    if(int(write_buf3.at(1) >= 0)){
+        ui->lcdNumber_L1->display((int)write_buf3.at(1));
+    }
+    else{
+        ui->lcdNumber_L1->display((int)write_buf3.at(1));
+    }
+    if(int(write_buf3.at(2) >= 0)){
+        ui->lcdNumber_R1->display((int)write_buf3.at(2));
+    }
+    else{
+        ui->lcdNumber_R1->display((int)write_buf3.at(2));
+    }
+    if(int(write_buf3.at(3) >= 0)){
+        ui->lcdNumber_L2->display((int)write_buf3.at(3));
+    }
+    else{
+        ui->lcdNumber_L2->display((int)write_buf3.at(3));
+    }
+    if(int(write_buf3.at(4) >= 0)){
+        ui->lcdNumber_R2->display((int)write_buf3.at(4));
+    }
+    else{
+        ui->lcdNumber_R2->display((int)write_buf3.at(4));
+    }
+    if(int(write_buf3.at(5) >= 0)){
+        ui->lcdNumber_L3->display((int)write_buf3.at(5));
+    }
+    else{
+        ui->lcdNumber_L3->display((int)write_buf3.at(5));
+    }
+    if(int(write_buf3.at(6) >= 0)){
+        ui->lcdNumber_R3->display((int)write_buf3.at(6));
+    }
+    else{
+        ui->lcdNumber_R3->display((int)write_buf3.at(6));
+    }
+    if(int(write_buf3.at(7) >= 0)){
+        ui->lcdNumber_L4->display((int)write_buf3.at(7));
+    }
+    else{
+        ui->lcdNumber_L4->display((int)write_buf3.at(7));
+    }
+    if(int(write_buf3.at(8) >= 0)){
+        ui->lcdNumber_R4->display((int)write_buf3.at(8));
+    }
+    else{
+        ui->lcdNumber_R4->display((int)write_buf3.at(8));
+    }
+    if(int(write_buf3.at(9) >= 0)){
+        ui->lcdNumber_L5->display((int)write_buf3.at(9));
+    }
+    else{
+        ui->lcdNumber_L5->display((int)write_buf3.at(9));
+    }
+    if(int(write_buf3.at(10) >= 0)){
+        ui->lcdNumber_R5->display((int)write_buf3.at(10));
+    }
+    else{
+        ui->lcdNumber_R5->display((int)write_buf3.at(10));
     }
 }
 
@@ -171,6 +233,77 @@ void MainWindow::read_Data()
             else{
                 ui->spinBox_texte_2->setValue(-(128 + (int)read_buf.at(2))); //Vel. Dir.
             }
+
+
+
+
+            if(int(read_buf.at(0) >= 0)){
+                ui->lcdNumber_id_r->display((int)read_buf.at(0));
+            }
+            else{
+                ui->lcdNumber_id_r->display(-(128 + (int)read_buf.at(0)));
+            }
+            if(int(read_buf.at(1) >= 0)){
+                ui->lcdNumber_L1_r->display((int)read_buf.at(1));
+            }
+            else{
+                ui->lcdNumber_L1_r->display(-(128 + (int)read_buf.at(1)));
+            }
+            if(int(read_buf.at(2) >= 0)){
+                ui->lcdNumber_R1_r->display((int)read_buf.at(2));
+            }
+            else{
+                ui->lcdNumber_R1_r->display(-(128 + (int)read_buf.at(2)));
+            }
+            if(int(read_buf.at(3) >= 0)){
+                ui->lcdNumber_L2_r->display((int)read_buf.at(3));
+            }
+            else{
+                ui->lcdNumber_L2_r->display(-(128 + (int)read_buf.at(3)));
+            }
+            if(int(read_buf.at(4) >= 0)){
+                ui->lcdNumber_R2_r->display((int)read_buf.at(4));
+            }
+            else{
+                ui->lcdNumber_R2_r->display(-(128 + (int)read_buf.at(4)));
+            }
+            if(int(read_buf.at(5) >= 0)){
+                ui->lcdNumber_L3_r->display((int)read_buf.at(5));
+            }
+            else{
+                ui->lcdNumber_L3_r->display(-(128 + (int)read_buf.at(5)));
+            }
+            if(int(read_buf.at(6) >= 0)){
+                ui->lcdNumber_R3_r->display((int)read_buf.at(6));
+            }
+            else{
+                ui->lcdNumber_R3_r->display(-(128 + (int)read_buf.at(6)));
+            }
+            if(int(read_buf.at(7) >= 0)){
+                ui->lcdNumber_L4_r->display((int)read_buf.at(7));
+            }
+            else{
+                ui->lcdNumber_L4_r->display(-(128 + (int)read_buf.at(7)));
+            }
+            if(int(read_buf.at(8) >= 0)){
+                ui->lcdNumber_R4_r->display((int)read_buf.at(8));
+            }
+            else{
+                ui->lcdNumber_R4_r->display(-(128 + (int)read_buf.at(8)));
+            }
+            if(int(read_buf.at(9) >= 0)){
+                ui->lcdNumber_L5_r->display((int)read_buf.at(9));
+            }
+            else{
+                ui->lcdNumber_L5_r->display(-(128 + (int)read_buf.at(9)));
+            }
+            if(int(read_buf.at(10) >= 0)){
+                ui->lcdNumber_R5_r->display((int)read_buf.at(10));
+            }
+            else{
+                ui->lcdNumber_R5_r->display(-(128 + (int)read_buf.at(10)));
+            }
+
         }
     }
 }
@@ -314,11 +447,13 @@ void MainWindow::on_Girar_clicked()
   //ui->verticalSlider_vel_R->setValue(100);
   //ui->verticalSlider_vel_L->setValue(100);
     write_Data(); // comando para girar
-    QThread::sleep(1); // 1 seg de pause
+    QThread::sleep(5); // 1 seg de pause
     read_Data();
     ui->verticalSlider_vel_L->setValue(0); ui->spinBox_vel_L->setValue(0);
     ui->verticalSlider_vel_R->setValue(0); ui->spinBox_vel_R->setValue(0);
     write_Data(); // comando para parar
+    //QThread::sleep(5); // 1 seg de pause
+    read_Data();
   //serialPort->waitForReadyRead(100);
   //QThread::msleep(5000);
 //  pthread_cond_wait()
