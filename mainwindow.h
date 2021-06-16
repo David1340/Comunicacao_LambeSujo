@@ -84,6 +84,8 @@ private slots:
 
     void on_spinBox_texte_3_valueChanged(int arg1);
 
+    void on_navegar_clicked();
+
 public slots:
     void connectToSerial();
     void checkSerial();
@@ -92,7 +94,6 @@ public slots:
     void write_Data();
     void read_Data();
     void initActionsConnections();
-    void showStatusMessage(const QString &message);
 
 private:
     Ui::MainWindow *ui;

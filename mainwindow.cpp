@@ -113,11 +113,13 @@ void MainWindow::write_Data()
 
     int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
     for(int i=0; i<11;i++){
-        write_buf[i] = C0; // ZERA O BUFFER DE ESCRITA INTEIRO
+        if(i!=index && i!=(2*index+1) && i!=(2*index+2)){
+            write_buf[i] = C0; // ZERA O BUFFER DE ESCRITA
+        }
     }
     write_buf[0] = (unsigned char) (250+index); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
-    write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value());
-    write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value());
+    //write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+    //write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
     //Buffer Completo
     //1 3 5 7 9
     //0 1 2 3 4
@@ -149,61 +151,61 @@ void MainWindow::write_Data()
         ui->lcdNumber_L1->display((int)write_buf3.at(1));
     }
     else{
-        ui->lcdNumber_L1->display((int)write_buf3.at(1));
+        ui->lcdNumber_L1->display(-(128 + (int)write_buf3.at(1)));
     }
     if(int(write_buf3.at(2) >= 0)){
         ui->lcdNumber_R1->display((int)write_buf3.at(2));
     }
     else{
-        ui->lcdNumber_R1->display((int)write_buf3.at(2));
+        ui->lcdNumber_R1->display(-(128 + (int)write_buf3.at(2)));
     }
     if(int(write_buf3.at(3) >= 0)){
         ui->lcdNumber_L2->display((int)write_buf3.at(3));
     }
     else{
-        ui->lcdNumber_L2->display((int)write_buf3.at(3));
+        ui->lcdNumber_L2->display(-(128 + (int)write_buf3.at(3)));
     }
     if(int(write_buf3.at(4) >= 0)){
         ui->lcdNumber_R2->display((int)write_buf3.at(4));
     }
     else{
-        ui->lcdNumber_R2->display((int)write_buf3.at(4));
+        ui->lcdNumber_R2->display(-(128 + (int)write_buf3.at(4)));
     }
     if(int(write_buf3.at(5) >= 0)){
         ui->lcdNumber_L3->display((int)write_buf3.at(5));
     }
     else{
-        ui->lcdNumber_L3->display((int)write_buf3.at(5));
+        ui->lcdNumber_L3->display(-(128 + (int)write_buf3.at(5)));
     }
     if(int(write_buf3.at(6) >= 0)){
         ui->lcdNumber_R3->display((int)write_buf3.at(6));
     }
     else{
-        ui->lcdNumber_R3->display((int)write_buf3.at(6));
+        ui->lcdNumber_R3->display(-(128 + (int)write_buf3.at(6)));
     }
     if(int(write_buf3.at(7) >= 0)){
         ui->lcdNumber_L4->display((int)write_buf3.at(7));
     }
     else{
-        ui->lcdNumber_L4->display((int)write_buf3.at(7));
+        ui->lcdNumber_L4->display(-(128 + (int)write_buf3.at(7)));
     }
     if(int(write_buf3.at(8) >= 0)){
         ui->lcdNumber_R4->display((int)write_buf3.at(8));
     }
     else{
-        ui->lcdNumber_R4->display((int)write_buf3.at(8));
+        ui->lcdNumber_R4->display(-(128 + (int)write_buf3.at(8)));
     }
     if(int(write_buf3.at(9) >= 0)){
         ui->lcdNumber_L5->display((int)write_buf3.at(9));
     }
     else{
-        ui->lcdNumber_L5->display((int)write_buf3.at(9));
+        ui->lcdNumber_L5->display(-(128 + (int)write_buf3.at(9)));
     }
     if(int(write_buf3.at(10) >= 0)){
         ui->lcdNumber_R5->display((int)write_buf3.at(10));
     }
     else{
-        ui->lcdNumber_R5->display((int)write_buf3.at(10));
+        ui->lcdNumber_R5->display(-(128 + (int)write_buf3.at(10)));
     }
 }
 
@@ -211,7 +213,7 @@ void MainWindow::write_Data()
 void MainWindow::read_Data()
 {
 
-    int index = ui->Select_Robot->currentIndex();
+    //int index = ui->Select_Robot->currentIndex();
     //const QByteArray datareceive = this->serialPort->readAll();
     if (flag_comunicacao)
     {
@@ -348,12 +350,6 @@ void MainWindow::initActionsConnections()
 
 }
 
-void MainWindow::showStatusMessage(const QString &message)
-{
-    //m_status->setText(message);
-    //ele que exibe se está conectado ou não
-}
-
 
 void MainWindow::on_Connect_Disconect_clicked()
 {
@@ -436,24 +432,34 @@ void MainWindow::on_spinBox_texte_3_valueChanged(int arg1)
 void MainWindow::on_Girar_clicked()
 {
   //QThread::msleep(10);
-  if(ui->verticalSlider_vel_L->value()==0){
-      ui->verticalSlider_vel_L->setValue(100);
-      ui->spinBox_vel_L->setValue(100);
-  }
-  if(ui->verticalSlider_vel_R->value()==0){
-      ui->verticalSlider_vel_R->setValue(-100);
-      ui->spinBox_vel_R->setValue(-100);
-  }
+  //if(ui->verticalSlider_vel_L->value()==int(0)){
+      //ui->verticalSlider_vel_L->setValue(100);
+      //ui->spinBox_vel_L->setValue(100);
+  //}
+  //if(ui->verticalSlider_vel_R->value()==int(0)){
+      //ui->verticalSlider_vel_R->setValue(-100);
+      //ui->spinBox_vel_R->setValue(-100);
+  //}
   //ui->verticalSlider_vel_R->setValue(100);
   //ui->verticalSlider_vel_L->setValue(100);
+    int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
+    write_buf[2*index + 1] = converter_write(100); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+    write_buf[2*index + 2] = converter_write(-100); // VELOCIDADE DIREITA DO ROBÔ(ID)
+    //QThread::sleep(1); // 1 seg de pause
     write_Data(); // comando para girar
-    QThread::sleep(5); // 1 seg de pause
-    read_Data();
-    ui->verticalSlider_vel_L->setValue(0); ui->spinBox_vel_L->setValue(0);
-    ui->verticalSlider_vel_R->setValue(0); ui->spinBox_vel_R->setValue(0);
+    QThread::sleep(1); // 1 seg de pause
+    //if(this->serialPort->bytesAvailable()){
+        read_Data();
+    //}
+    write_buf[2*index + 1] = converter_write(0); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+    write_buf[2*index + 2] = converter_write(0); // VELOCIDADE DIREITA DO ROBÔ(ID)
+    //ui->verticalSlider_vel_L->setValue(0); ui->spinBox_vel_L->setValue(0);
+    //ui->verticalSlider_vel_R->setValue(0); ui->spinBox_vel_R->setValue(0);
     write_Data(); // comando para parar
-    //QThread::sleep(5); // 1 seg de pause
-    read_Data();
+    QThread::msleep(10); // 1 ms de pause
+    //if(this->serialPort->bytesAvailable()){
+        read_Data();
+    //}
   //serialPort->waitForReadyRead(100);
   //QThread::msleep(5000);
 //  pthread_cond_wait()
@@ -471,3 +477,16 @@ void MainWindow::on_Girar_clicked()
 }
 
 
+
+void MainWindow::on_navegar_clicked()
+{
+    write_Data(); // comando para girar
+    QThread::sleep(1); // 1 seg de pause
+    //if(this->serialPort->bytesAvailable()){
+        read_Data();
+    //}
+        //if(ui->verticalSlider_vel_L->SliderValueChange() || ui->verticalSlider_vel_R->SliderValueChange()){
+          //  write_Data(); // atualiza comando
+        //}
+        //if(ui->spinBox_vel_L->valueChanged())
+}
