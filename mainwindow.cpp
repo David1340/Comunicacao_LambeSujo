@@ -114,12 +114,12 @@ void MainWindow::write_Data()
     int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
     for(int i=0; i<11;i++){
         if(i!=index && i!=(2*index+1) && i!=(2*index+2)){
-            write_buf[i] = C0; // ZERA O BUFFER DE ESCRITA
+            write_buf[i] = C0; // ZERA CAMPOS DO BUFFER DE ESCRITA QUE NÃO SÃO DE INTERESSE
         }
     }
     write_buf[0] = (unsigned char) (250+index); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
-    //write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
-    //write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
+    write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+    write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
     //Buffer Completo
     //1 3 5 7 9
     //0 1 2 3 4
@@ -129,13 +129,13 @@ void MainWindow::write_Data()
     //write_buf3 = QByteArray::fromRawData(write_buf,11);
     if (flag_comunicacao)
     {
-        this->serialPort->write(write_buf3);
+        this->serialPort->write(write_buf3); // ENVIA OS DADOS
         //this->serialPort->write(write_buf);
        //qint64 i = QIODevice::writeData(const char 'a',11);
     }
 
+    // PROCEDIMENTOS PARA EXIBIÇÃO NA INTERFACE
     const QString texto = write_buf3;
-    //const QString texto = {(char)write_buf3.at(0),(char)write_buf3.at(1),(char)write_buf3.at(2),(char)write_buf3.at(3),(char)write_buf3.at(4),(char)write_buf3.at(5),(char)write_buf3.at(6),(char)write_buf3.at(7),(char)write_buf3.at(8),(char)write_buf3.at(9),(char)write_buf3.at(10)};
     ui->lineEdit->setText(texto);
 
     if(int(write_buf3.at(0) >= 0)){
@@ -445,17 +445,22 @@ void MainWindow::on_Girar_clicked()
     int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
     write_buf[2*index + 1] = converter_write(100); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
     write_buf[2*index + 2] = converter_write(-100); // VELOCIDADE DIREITA DO ROBÔ(ID)
-    //QThread::sleep(1); // 1 seg de pause
-    write_Data(); // comando para girar
     QThread::sleep(1); // 1 seg de pause
+    serialPort->flush();
+    write_Data(); // comando para girar
+    //serialPort->waitForReadyRead(100);
+    //QThread::sleep(1); // 1 seg de pause
     //if(this->serialPort->bytesAvailable()){
         read_Data();
     //}
+    QThread::sleep(5); // 1 seg de pause TEMPO EM QUE O ROBÔ FICA GIRANDO
     write_buf[2*index + 1] = converter_write(0); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
     write_buf[2*index + 2] = converter_write(0); // VELOCIDADE DIREITA DO ROBÔ(ID)
     //ui->verticalSlider_vel_L->setValue(0); ui->spinBox_vel_L->setValue(0);
     //ui->verticalSlider_vel_R->setValue(0); ui->spinBox_vel_R->setValue(0);
+    serialPort->flush();
     write_Data(); // comando para parar
+    //serialPort->waitForReadyRead(100);
     QThread::msleep(10); // 1 ms de pause
     //if(this->serialPort->bytesAvailable()){
         read_Data();
@@ -480,13 +485,23 @@ void MainWindow::on_Girar_clicked()
 
 void MainWindow::on_navegar_clicked()
 {
-    write_Data(); // comando para girar
-    QThread::sleep(1); // 1 seg de pause
-    //if(this->serialPort->bytesAvailable()){
-        read_Data();
-    //}
-        //if(ui->verticalSlider_vel_L->SliderValueChange() || ui->verticalSlider_vel_R->SliderValueChange()){
-          //  write_Data(); // atualiza comando
+    float inicio;
+    float fim;
+    float tempo_medido = 0.0;
+    //while(tempo_medido<5.0){
+        inicio = clock();
+        serialPort->flush();
+        write_Data();
+        QThread::msleep(30); // 1 ms de pause
+        //serialPort->waitForReadyRead(100);
+        //if(this->serialPort->bytesAvailable()){
+            read_Data();
         //}
-        //if(ui->spinBox_vel_L->valueChanged())
+            //if(ui->verticalSlider_vel_L->SliderValueChange() || ui->verticalSlider_vel_R->SliderValueChange()){
+              //  write_Data(); // atualiza comando
+            //}
+            //if(ui->spinBox_vel_L->valueChanged())
+        fim = clock();
+        tempo_medido = tempo_medido +(fim-inicio);
+    //}
 }
