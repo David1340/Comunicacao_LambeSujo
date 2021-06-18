@@ -10,6 +10,12 @@
 #include <QTimer>
 #include <stdio.h>
 #include <QThread>
+
+//#include <qwt/qwt_plot.h>
+//#include <qwt/qwt_plot_curve.h>
+//#include <qwt/qwt_plot_grid.h>
+//#include <qwt/qwt_symbol.h>
+//#include <qwt/qwt_legend.h>
 //Só é necessário para a comunicação Serial o QSerialPortInfo e o QSerialPort
 
 /* MANDAR VELOCIDADE NULA SEM PRECISAR DO CAST SEMPRE */
@@ -74,17 +80,13 @@ private slots:
 
 
 
-    void on_spinBox_texte_valueChanged(int arg1);
-
-    void on_spinBox_texte_2_valueChanged(int arg1);
-
     void on_Select_Robot_activated(int index);
 
     void on_Girar_clicked();
 
-    void on_spinBox_texte_3_valueChanged(int arg1);
-
     void on_navegar_clicked();
+
+    void graph_config();
 
 public slots:
     void connectToSerial();
@@ -103,6 +105,8 @@ private:
     unsigned char read_buf[11] = {C0,C0,C0,C0,C0,C0,C0,C0,C0,C0,C0};  // buffer de leitura inicado com velocidades zero
     const QByteArray read_buf2;
     QTimer *timer;
+    QVector<double> xplot, yplot1, yplot2;
+    bool flag_navegacao=0;
 
 };
 

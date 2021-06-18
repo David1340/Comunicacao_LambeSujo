@@ -36,8 +36,11 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     ui->comboBox->insertItems(0, portas); //Dessa forma funciona para qualquer sistema operacional
     connect(ui->Connect_Disconect,SIGNAL(clicked(bool)),this,SLOT(connectToSerial())); // conexão serial
-    ui->label->setText("Desconectado");
-    ui->Baud_Rate->setText(""); //limpando label do Baud Rate
+    ui->label->setText(""); //limpando label
+    //ui->Baud_Rate->setText(""); //limpando label do Baud Rate
+
+    MainWindow::graph_config();
+
 }
 
 
@@ -59,9 +62,9 @@ void MainWindow::connectToSerial(){
     if(this->serialPort->isOpen()){ // se conectado
         closeSerialPort();
         //this->serialPort->close();
-        ui->label->setText("Desconectado");
+        //ui->label->setText("Desconectado");
         ui->Connect_Disconect->setText("Conectar");
-        ui->Baud_Rate->setText(""); //limpando label do Baud Rate      
+        //ui->Baud_Rate->setText(""); //limpando label do Baud Rate
         return;
     }
     // Parâmetros de Abertura da Porta Serial
@@ -75,14 +78,14 @@ void MainWindow::connectToSerial(){
     }
 
     if(this->serialPort->open(QIODevice::ReadWrite)){ // Verificação se a porta realmente abriu        
-        ui->label->setText("Conectado");
+        /*ui->label->setText("Conectado");
         ui->Baud_Rate->setText("Communication Paramaters\n"
                                "Baudrate: 115200\n"
                                "Data bits: 8\n"
                                "Parity: None\n"
                                "Stop bits: 1\n"
                                "Flow control: None");
-
+        */
         ui->Connect_Disconect->setText("Desconectar");
 
         flag_comunicacao = !flag_comunicacao; // altera o flag de comunicação 0 - SemComunicação e 1 - ComComunicação
@@ -118,8 +121,8 @@ void MainWindow::write_Data()
         }
     }
     write_buf[0] = (unsigned char) (250+index); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
-    write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
-    write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
+    //write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+    //write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
     //Buffer Completo
     //1 3 5 7 9
     //0 1 2 3 4
@@ -136,14 +139,14 @@ void MainWindow::write_Data()
 
     // PROCEDIMENTOS PARA EXIBIÇÃO NA INTERFACE
     const QString texto = write_buf3;
-    ui->lineEdit->setText(texto);
+    //ui->lineEdit->setText(texto);
 
     if(int(write_buf3.at(0) >= 0)){
-        ui->spinBox_texte->setValue((int)write_buf3.at(0));
+        //ui->spinBox_texte->setValue((int)write_buf3.at(0));
         ui->lcdNumber_id->display((int)write_buf3.at(0));
     }
     else{
-        ui->spinBox_texte->setValue(-(128 + (int)write_buf3.at(0)));
+        //ui->spinBox_texte->setValue(-(128 + (int)write_buf3.at(0)));
         //ui->spinBox_texte->setValue((int)(unsigned char)write_buf3.at(1));
         ui->lcdNumber_id->display(-(128 + (int)write_buf3.at(0)));
     }
@@ -220,8 +223,19 @@ void MainWindow::read_Data()
         if(this->serialPort->bytesAvailable()){
             QByteArray read_buf = this->serialPort->read(11);
             const QString texto = read_buf;
-            ui->lineEdit_2->setText(texto);
+            //ui->lineEdit_2->setText(texto);
 
+            //Atualização do plot
+            int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
+            yplot1.pop_front(); //Removi o primeiro elemento
+            yplot1.push_back(converter_read(read_buf[2*index + 1])); //Adicionei um novo elemento no final
+            yplot2.pop_front(); //Removi o primeiro elemento
+            yplot2.push_back(converter_read(read_buf[2*index + 2])); //Adicionei um novo elemento no final
+            ui->widget->graph(0)->setData(xplot, yplot1);
+            ui->widget->graph(1)->setData(xplot, yplot2);
+            ui->widget->replot();
+
+            /*
             if(int(read_buf.at(1) >= 0)){
                 ui->spinBox_texte_3->setValue((int)read_buf.at(1)); //Vel. Esq.
             }
@@ -235,6 +249,7 @@ void MainWindow::read_Data()
             else{
                 ui->spinBox_texte_2->setValue(-(128 + (int)read_buf.at(2))); //Vel. Dir.
             }
+            */
 
 
 
@@ -375,7 +390,11 @@ void MainWindow::on_Read_clicked()
 
 void MainWindow::on_Write_clicked()
 {
+    int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
+    write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+    write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
     write_Data();
+
 }
 
 
@@ -383,21 +402,69 @@ void MainWindow::on_Write_clicked()
 void MainWindow::on_spinBox_vel_R_valueChanged(int arg1)
 {
     ui->verticalSlider_vel_R->setValue(arg1);
+
+    if(flag_navegacao==1){   // Atualiza a velocidade da navegação
+        int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
+        write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+        write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
+        serialPort->flush();
+        write_Data();
+        //QThread::msleep(100); // 1 ms de pause
+        //serialPort->waitForReadyRead(100);
+        //read_Data();
+        read_Data();
+    }
 }
 
 void MainWindow::on_spinBox_vel_L_valueChanged(int arg1)
 {
     ui->verticalSlider_vel_L->setValue(arg1);
+
+    if(flag_navegacao==1){  // Atualiza a velocidade da navegação
+        int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
+        write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+        write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
+        serialPort->flush();
+        write_Data();
+        //QThread::msleep(100); // 1 ms de pause
+        //serialPort->waitForReadyRead(100);
+        //read_Data();
+        read_Data();
+    }
 }
 
 void MainWindow::on_verticalSlider_vel_R_valueChanged(int value)
 {
     ui->spinBox_vel_R->setValue(value);
+
+    if(flag_navegacao==1){  // Atualiza a velocidade da navegação
+        int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
+        write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+        write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
+        serialPort->flush();
+        write_Data();
+        //QThread::msleep(100); // 1 ms de pause
+        //serialPort->waitForReadyRead(100);
+        //read_Data();
+        read_Data();
+    }
 }
 
 void MainWindow::on_verticalSlider_vel_L_valueChanged(int value)
 {
     ui->spinBox_vel_L->setValue(value);
+
+    if(flag_navegacao==1){   // Atualiza a velocidade da navegação
+        int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
+        write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+        write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
+        serialPort->flush();
+        write_Data();
+        //QThread::msleep(100); // 1 ms de pause
+        //serialPort->waitForReadyRead(100);
+        //read_Data();
+        read_Data();
+    }
 }
 
 void MainWindow::on_Select_Robot_activated(int index)
@@ -414,20 +481,7 @@ void MainWindow::on_Select_Robot_activated(int index)
 */
 }
 
-void MainWindow::on_spinBox_texte_valueChanged(int arg1)
-{
 
-}
-
-void MainWindow::on_spinBox_texte_2_valueChanged(int arg1)
-{
-
-}
-
-void MainWindow::on_spinBox_texte_3_valueChanged(int arg1)
-{
-
-}
 
 void MainWindow::on_Girar_clicked()
 {
@@ -445,15 +499,13 @@ void MainWindow::on_Girar_clicked()
     int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
     write_buf[2*index + 1] = converter_write(100); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
     write_buf[2*index + 2] = converter_write(-100); // VELOCIDADE DIREITA DO ROBÔ(ID)
-    QThread::sleep(1); // 1 seg de pause
+    QThread::msleep(100); // 1 seg de pause
     serialPort->flush();
     write_Data(); // comando para girar
-    //serialPort->waitForReadyRead(100);
-    //QThread::sleep(1); // 1 seg de pause
-    //if(this->serialPort->bytesAvailable()){
-        read_Data();
-    //}
-    QThread::sleep(5); // 1 seg de pause TEMPO EM QUE O ROBÔ FICA GIRANDO
+    //QThread::msleep(100); // 1 ms de pause
+    read_Data();
+    read_Data();
+    QThread::sleep(1); // 1 seg de pause TEMPO EM QUE O ROBÔ FICA GIRANDO
     write_buf[2*index + 1] = converter_write(0); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
     write_buf[2*index + 2] = converter_write(0); // VELOCIDADE DIREITA DO ROBÔ(ID)
     //ui->verticalSlider_vel_L->setValue(0); ui->spinBox_vel_L->setValue(0);
@@ -461,24 +513,9 @@ void MainWindow::on_Girar_clicked()
     serialPort->flush();
     write_Data(); // comando para parar
     //serialPort->waitForReadyRead(100);
-    QThread::msleep(10); // 1 ms de pause
-    //if(this->serialPort->bytesAvailable()){
-        read_Data();
-    //}
-  //serialPort->waitForReadyRead(100);
-  //QThread::msleep(5000);
-//  pthread_cond_wait()
-    /*
-  serialPort->waitForBytesWritten(10);
-  read_Data();
- // QThread::usleep(10);
- QThread::msleep(1000);
-  ui->verticalSlider_vel_L->setValue(0);
-  write_Data();
-  //serialPort->waitForReadyRead(100);
- QThread::msleep(100);
-  read_Data();*/
-  // coment teste
+    //QThread::msleep(100); // 1 ms de pause
+    read_Data();
+    read_Data();
 }
 
 
@@ -489,14 +526,28 @@ void MainWindow::on_navegar_clicked()
     float fim;
     float tempo_medido = 0.0;
     //while(tempo_medido<5.0){
+    if(flag_navegacao==0){
+        ui->navegar->setText("Parar navegação");
+        flag_navegacao = 1;
+
+        int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
+        write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+        write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
         inicio = clock();
         serialPort->flush();
         write_Data();
-        QThread::msleep(30); // 1 ms de pause
+        QThread::msleep(100); // 1 ms de pause
         //serialPort->waitForReadyRead(100);
-        //if(this->serialPort->bytesAvailable()){
-            read_Data();
-        //}
+        read_Data();
+        read_Data();
+    }
+        else
+    {
+        ui->navegar->setText("Navegar");
+        flag_navegacao = 0;
+    }
+
+
             //if(ui->verticalSlider_vel_L->SliderValueChange() || ui->verticalSlider_vel_R->SliderValueChange()){
               //  write_Data(); // atualiza comando
             //}
@@ -504,4 +555,35 @@ void MainWindow::on_navegar_clicked()
         fim = clock();
         tempo_medido = tempo_medido +(fim-inicio);
     //}
+}
+
+
+void MainWindow::graph_config(){
+    QVector<double> x(101), y(101); // initialize with entries 0..100
+
+        xplot = x;
+        yplot1 = y;
+        yplot2 = y;
+
+        for (int i=0; i<101; ++i)
+        {
+          xplot[i] = i; // Inicializando
+          yplot1[i] = 0;
+          yplot2[i] = 0;
+        }
+        // create graph and assign data to it:
+        ui->widget->addGraph();
+
+        ui->widget->addGraph();
+        //ui->widget->graph(1)->setData(x, x);
+        ui->widget->graph(1)->setPen(QPen(Qt::red));
+        // give the axes some labels:
+        ui->widget->yAxis->setLabel("Vel");
+        // set axes ranges, so we see all data:
+        ui->widget->xAxis->setRange(0, 100);
+        ui->widget->yAxis->setRange(-105, 105);
+        //tirando o label inferior
+        ui->widget->xAxis->setVisible(false);
+        ui->widget->replot();
+
 }
