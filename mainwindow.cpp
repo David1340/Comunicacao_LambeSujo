@@ -485,24 +485,15 @@ void MainWindow::on_Select_Robot_activated(int index)
 
 void MainWindow::on_Girar_clicked()
 {
-  //QThread::msleep(10);
-  //if(ui->verticalSlider_vel_L->value()==int(0)){
-      //ui->verticalSlider_vel_L->setValue(100);
-      //ui->spinBox_vel_L->setValue(100);
-  //}
-  //if(ui->verticalSlider_vel_R->value()==int(0)){
-      //ui->verticalSlider_vel_R->setValue(-100);
-      //ui->spinBox_vel_R->setValue(-100);
-  //}
-  //ui->verticalSlider_vel_R->setValue(100);
-  //ui->verticalSlider_vel_L->setValue(100);
     int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
     write_buf[2*index + 1] = converter_write(100); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
     write_buf[2*index + 2] = converter_write(-100); // VELOCIDADE DIREITA DO ROBÔ(ID)
-    QThread::msleep(100); // 1 seg de pause
+    //QThread::msleep(100); // 1 seg de pause
     serialPort->flush();
     write_Data(); // comando para girar
-    //QThread::msleep(100); // 1 ms de pause
+    //serialPort->waitForReadyRead(50);
+    QThread::msleep(50); // 1 ms de pause
+    serialPort->flush();
     read_Data();
     read_Data();
     QThread::sleep(1); // 1 seg de pause TEMPO EM QUE O ROBÔ FICA GIRANDO
@@ -512,10 +503,11 @@ void MainWindow::on_Girar_clicked()
     //ui->verticalSlider_vel_R->setValue(0); ui->spinBox_vel_R->setValue(0);
     serialPort->flush();
     write_Data(); // comando para parar
-    //serialPort->waitForReadyRead(100);
-    //QThread::msleep(100); // 1 ms de pause
+    //serialPort->waitForReadyRead(50);
+    QThread::msleep(50); // 1 ms de pause
+    serialPort->flush();
     read_Data();
-    read_Data();
+    //read_Data();
 }
 
 
