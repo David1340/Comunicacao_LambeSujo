@@ -114,13 +114,7 @@ void MainWindow::closeSerialPort()
 void MainWindow::write_Data()
 {
 
-    int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
-    for(int i=0; i<11;i++){
-        if(i!=index && i!=(2*index+1) && i!=(2*index+2)){
-            write_buf[i] = C0; // ZERA CAMPOS DO BUFFER DE ESCRITA QUE NÃO SÃO DE INTERESSE
-        }
-    }
-    write_buf[0] = (unsigned char) (250+index); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
+
     //write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
     //write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
     //Buffer Completo
@@ -486,8 +480,16 @@ void MainWindow::on_Select_Robot_activated(int index)
 void MainWindow::on_Girar_clicked()
 {
     int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
-    write_buf[2*index + 1] = converter_write(100); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
-    write_buf[2*index + 2] = converter_write(-100); // VELOCIDADE DIREITA DO ROBÔ(ID)
+    //for(int i=0; i<11;i++){
+    //    if(i!=index && i!=(2*index+1) && i!=(2*index+2)){
+    //        write_buf[i] = C0; // ZERA CAMPOS DO BUFFER DE ESCRITA QUE NÃO SÃO DE INTERESSE
+    //    }
+    //}
+    write_buf[0] = (unsigned char) (249+index); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
+    for(int i=0; i<5;i++){
+        write_buf[2*i + 1] = converter_write(100); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+        write_buf[2*i + 2] = converter_write(-100); // VELOCIDADE DIREITA DO ROBÔ(ID)
+    }
     //QThread::msleep(100); // 1 seg de pause
     serialPort->flush();
     write_Data(); // comando para girar
@@ -497,17 +499,18 @@ void MainWindow::on_Girar_clicked()
     read_Data();
     read_Data();
     QThread::sleep(1); // 1 seg de pause TEMPO EM QUE O ROBÔ FICA GIRANDO
-    write_buf[2*index + 1] = converter_write(0); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
-    write_buf[2*index + 2] = converter_write(0); // VELOCIDADE DIREITA DO ROBÔ(ID)
-    //ui->verticalSlider_vel_L->setValue(0); ui->spinBox_vel_L->setValue(0);
-    //ui->verticalSlider_vel_R->setValue(0); ui->spinBox_vel_R->setValue(0);
+    for(int i=1; i<11;i++){
+        write_buf[i] = C0; // ZERA CAMPOS DO BUFFER DE ESCRITA QUE NÃO SÃO DE INTERESSE
+    }
+    //write_buf[2*index + 1] = converter_write(0); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+    //write_buf[2*index + 2] = converter_write(0); // VELOCIDADE DIREITA DO ROBÔ(ID)
     serialPort->flush();
     write_Data(); // comando para parar
     //serialPort->waitForReadyRead(50);
     QThread::msleep(50); // 1 ms de pause
     serialPort->flush();
     read_Data();
-    //read_Data();
+    read_Data();
 }
 
 
