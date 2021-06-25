@@ -75,6 +75,7 @@ void MainWindow::connectToSerial(){
     this->serialPort->setParity(QSerialPort::NoParity);
     this->serialPort->setStopBits(QSerialPort::OneStop);
     this->serialPort->setFlowControl(QSerialPort::NoFlowControl);
+    this->serialPort->QSerialPort::setReadBufferSize(11); // Definição do tamanho do buffer de entrada
     }
 
     if(this->serialPort->open(QIODevice::ReadWrite)){ // Verificação se a porta realmente abriu        
@@ -113,8 +114,6 @@ void MainWindow::closeSerialPort()
 //void MainWindow::write_Data(const QByteArray &data)
 void MainWindow::write_Data()
 {
-
-
     //write_buf[2*index + 1] = converter_write(ui->verticalSlider_vel_L->value()); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
     //write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
     //Buffer Completo
@@ -132,7 +131,7 @@ void MainWindow::write_Data()
     }
 
     // PROCEDIMENTOS PARA EXIBIÇÃO NA INTERFACE
-    const QString texto = write_buf3;
+    //const QString texto = write_buf3;
     //ui->lineEdit->setText(texto);
 
     if(int(write_buf3.at(0) >= 0)){
@@ -144,66 +143,20 @@ void MainWindow::write_Data()
         //ui->spinBox_texte->setValue((int)(unsigned char)write_buf3.at(1));
         ui->lcdNumber_id->display(-(128 + (int)write_buf3.at(0)));
     }
-    if(int(write_buf3.at(1) >= 0)){
-        ui->lcdNumber_L1->display((int)write_buf3.at(1));
-    }
-    else{
-        ui->lcdNumber_L1->display(-(128 + (int)write_buf3.at(1)));
-    }
-    if(int(write_buf3.at(2) >= 0)){
-        ui->lcdNumber_R1->display((int)write_buf3.at(2));
-    }
-    else{
-        ui->lcdNumber_R1->display(-(128 + (int)write_buf3.at(2)));
-    }
-    if(int(write_buf3.at(3) >= 0)){
-        ui->lcdNumber_L2->display((int)write_buf3.at(3));
-    }
-    else{
-        ui->lcdNumber_L2->display(-(128 + (int)write_buf3.at(3)));
-    }
-    if(int(write_buf3.at(4) >= 0)){
-        ui->lcdNumber_R2->display((int)write_buf3.at(4));
-    }
-    else{
-        ui->lcdNumber_R2->display(-(128 + (int)write_buf3.at(4)));
-    }
-    if(int(write_buf3.at(5) >= 0)){
-        ui->lcdNumber_L3->display((int)write_buf3.at(5));
-    }
-    else{
-        ui->lcdNumber_L3->display(-(128 + (int)write_buf3.at(5)));
-    }
-    if(int(write_buf3.at(6) >= 0)){
-        ui->lcdNumber_R3->display((int)write_buf3.at(6));
-    }
-    else{
-        ui->lcdNumber_R3->display(-(128 + (int)write_buf3.at(6)));
-    }
-    if(int(write_buf3.at(7) >= 0)){
-        ui->lcdNumber_L4->display((int)write_buf3.at(7));
-    }
-    else{
-        ui->lcdNumber_L4->display(-(128 + (int)write_buf3.at(7)));
-    }
-    if(int(write_buf3.at(8) >= 0)){
-        ui->lcdNumber_R4->display((int)write_buf3.at(8));
-    }
-    else{
-        ui->lcdNumber_R4->display(-(128 + (int)write_buf3.at(8)));
-    }
-    if(int(write_buf3.at(9) >= 0)){
-        ui->lcdNumber_L5->display((int)write_buf3.at(9));
-    }
-    else{
-        ui->lcdNumber_L5->display(-(128 + (int)write_buf3.at(9)));
-    }
-    if(int(write_buf3.at(10) >= 0)){
-        ui->lcdNumber_R5->display((int)write_buf3.at(10));
-    }
-    else{
-        ui->lcdNumber_R5->display(-(128 + (int)write_buf3.at(10)));
-    }
+
+    //ui->lcdNumber_L1->display(converter_read(write_buf3.at(0)));
+    ui->lcdNumber_L1->display(converter_read(write_buf3.at(1)));
+    ui->lcdNumber_R1->display(converter_read(write_buf3.at(2)));
+    ui->lcdNumber_L2->display(converter_read(write_buf3.at(3)));
+    ui->lcdNumber_R2->display(converter_read(write_buf3.at(4)));
+    ui->lcdNumber_L3->display(converter_read(write_buf3.at(5)));
+    ui->lcdNumber_R3->display(converter_read(write_buf3.at(6)));
+    ui->lcdNumber_L4->display(converter_read(write_buf3.at(7)));
+    ui->lcdNumber_R4->display(converter_read(write_buf3.at(8)));
+    ui->lcdNumber_L5->display(converter_read(write_buf3.at(9)));
+    ui->lcdNumber_R5->display(converter_read(write_buf3.at(10)));
+
+
 }
 
 
@@ -214,20 +167,13 @@ void MainWindow::read_Data()
     //const QByteArray datareceive = this->serialPort->readAll();
     if (flag_comunicacao)
     {
-        if(this->serialPort->bytesAvailable()){
+        while(this->serialPort->readBufferSize()<10){}
+        if(this->serialPort->bytesAvailable()==11){
             QByteArray read_buf = this->serialPort->read(11);
-            const QString texto = read_buf;
+            //const QString texto = read_buf;
             //ui->lineEdit_2->setText(texto);
 
-            //Atualização do plot
-            int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
-            yplot1.pop_front(); //Removi o primeiro elemento
-            yplot1.push_back(converter_read(read_buf[2*index + 1])); //Adicionei um novo elemento no final
-            yplot2.pop_front(); //Removi o primeiro elemento
-            yplot2.push_back(converter_read(read_buf[2*index + 2])); //Adicionei um novo elemento no final
-            ui->widget->graph(0)->setData(xplot, yplot1);
-            ui->widget->graph(1)->setData(xplot, yplot2);
-            ui->widget->replot();
+
 
             /*
             if(int(read_buf.at(1) >= 0)){
@@ -254,66 +200,27 @@ void MainWindow::read_Data()
             else{
                 ui->lcdNumber_id_r->display(-(128 + (int)read_buf.at(0)));
             }
-            if(int(read_buf.at(1) >= 0)){
-                ui->lcdNumber_L1_r->display((int)read_buf.at(1));
-            }
-            else{
-                ui->lcdNumber_L1_r->display(-(128 + (int)read_buf.at(1)));
-            }
-            if(int(read_buf.at(2) >= 0)){
-                ui->lcdNumber_R1_r->display((int)read_buf.at(2));
-            }
-            else{
-                ui->lcdNumber_R1_r->display(-(128 + (int)read_buf.at(2)));
-            }
-            if(int(read_buf.at(3) >= 0)){
-                ui->lcdNumber_L2_r->display((int)read_buf.at(3));
-            }
-            else{
-                ui->lcdNumber_L2_r->display(-(128 + (int)read_buf.at(3)));
-            }
-            if(int(read_buf.at(4) >= 0)){
-                ui->lcdNumber_R2_r->display((int)read_buf.at(4));
-            }
-            else{
-                ui->lcdNumber_R2_r->display(-(128 + (int)read_buf.at(4)));
-            }
-            if(int(read_buf.at(5) >= 0)){
-                ui->lcdNumber_L3_r->display((int)read_buf.at(5));
-            }
-            else{
-                ui->lcdNumber_L3_r->display(-(128 + (int)read_buf.at(5)));
-            }
-            if(int(read_buf.at(6) >= 0)){
-                ui->lcdNumber_R3_r->display((int)read_buf.at(6));
-            }
-            else{
-                ui->lcdNumber_R3_r->display(-(128 + (int)read_buf.at(6)));
-            }
-            if(int(read_buf.at(7) >= 0)){
-                ui->lcdNumber_L4_r->display((int)read_buf.at(7));
-            }
-            else{
-                ui->lcdNumber_L4_r->display(-(128 + (int)read_buf.at(7)));
-            }
-            if(int(read_buf.at(8) >= 0)){
-                ui->lcdNumber_R4_r->display((int)read_buf.at(8));
-            }
-            else{
-                ui->lcdNumber_R4_r->display(-(128 + (int)read_buf.at(8)));
-            }
-            if(int(read_buf.at(9) >= 0)){
-                ui->lcdNumber_L5_r->display((int)read_buf.at(9));
-            }
-            else{
-                ui->lcdNumber_L5_r->display(-(128 + (int)read_buf.at(9)));
-            }
-            if(int(read_buf.at(10) >= 0)){
-                ui->lcdNumber_R5_r->display((int)read_buf.at(10));
-            }
-            else{
-                ui->lcdNumber_R5_r->display(-(128 + (int)read_buf.at(10)));
-            }
+
+            ui->lcdNumber_L1_r->display(converter_read(read_buf.at(1)));
+            ui->lcdNumber_R1_r->display(converter_read(read_buf.at(2)));
+            ui->lcdNumber_L2_r->display(converter_read(read_buf.at(3)));
+            ui->lcdNumber_R2_r->display(converter_read(read_buf.at(4)));
+            ui->lcdNumber_L3_r->display(converter_read(read_buf.at(5)));
+            ui->lcdNumber_R3_r->display(converter_read(read_buf.at(6)));
+            ui->lcdNumber_L4_r->display(converter_read(read_buf.at(7)));
+            ui->lcdNumber_R4_r->display(converter_read(read_buf.at(8)));
+            ui->lcdNumber_L5_r->display(converter_read(read_buf.at(9)));
+            ui->lcdNumber_R5_r->display(converter_read(read_buf.at(10)));
+
+            //Atualização do plot
+            int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
+            yplot1.pop_front(); //Removi o primeiro elemento
+            yplot1.push_back(converter_read(read_buf[2*index + 1])); //Adicionei um novo elemento no final
+            yplot2.pop_front(); //Removi o primeiro elemento
+            yplot2.push_back(converter_read(read_buf[2*index + 2])); //Adicionei um novo elemento no final
+            ui->widget->graph(0)->setData(xplot, yplot1);
+            ui->widget->graph(1)->setData(xplot, yplot2);
+            ui->widget->replot();
 
         }
     }
@@ -403,7 +310,7 @@ void MainWindow::on_spinBox_vel_R_valueChanged(int arg1)
         write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
         serialPort->flush();
         write_Data();
-        //QThread::msleep(100); // 1 ms de pause
+        QThread::msleep(100); // 1 ms de pause
         //serialPort->waitForReadyRead(100);
         //read_Data();
         read_Data();
@@ -420,7 +327,7 @@ void MainWindow::on_spinBox_vel_L_valueChanged(int arg1)
         write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
         serialPort->flush();
         write_Data();
-        //QThread::msleep(100); // 1 ms de pause
+        QThread::msleep(100); // 1 ms de pause
         //serialPort->waitForReadyRead(100);
         //read_Data();
         read_Data();
@@ -437,7 +344,7 @@ void MainWindow::on_verticalSlider_vel_R_valueChanged(int value)
         write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
         serialPort->flush();
         write_Data();
-        //QThread::msleep(100); // 1 ms de pause
+        QThread::msleep(100); // 1 ms de pause
         //serialPort->waitForReadyRead(100);
         //read_Data();
         read_Data();
@@ -454,7 +361,7 @@ void MainWindow::on_verticalSlider_vel_L_valueChanged(int value)
         write_buf[2*index + 2] = converter_write(ui->verticalSlider_vel_R->value()); // VELOCIDADE DIREITA DO ROBÔ(ID)
         serialPort->flush();
         write_Data();
-        //QThread::msleep(100); // 1 ms de pause
+        QThread::msleep(100); // 1 ms de pause
         //serialPort->waitForReadyRead(100);
         //read_Data();
         read_Data();
@@ -479,38 +386,38 @@ void MainWindow::on_Select_Robot_activated(int index)
 
 void MainWindow::on_Girar_clicked()
 {
-    int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
-    //for(int i=0; i<11;i++){
-    //    if(i!=index && i!=(2*index+1) && i!=(2*index+2)){
-    //        write_buf[i] = C0; // ZERA CAMPOS DO BUFFER DE ESCRITA QUE NÃO SÃO DE INTERESSE
-    //    }
-    //}
-    write_buf[0] = (unsigned char) (249+index); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
+    //int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
+    write_buf[0] = (unsigned char) (249); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
+    //write_buf[0] = converter_write(249);
     for(int i=0; i<5;i++){
-        write_buf[2*i + 1] = converter_write(100); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
-        write_buf[2*i + 2] = converter_write(-100); // VELOCIDADE DIREITA DO ROBÔ(ID)
+        write_buf[(2*i) + 1] = converter_write(100); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
+        write_buf[(2*i) + 2] = converter_write(-100); // VELOCIDADE DIREITA DO ROBÔ(ID)
     }
     //QThread::msleep(100); // 1 seg de pause
-    serialPort->flush();
+    //serialPort->flush();
     write_Data(); // comando para girar
     //serialPort->waitForReadyRead(50);
-    QThread::msleep(50); // 1 ms de pause
-    serialPort->flush();
-    read_Data();
-    read_Data();
+    //QThread::msleep(50); // 1 ms de pause
+    //if(this->serialPort->clear(QSerialPort::AllDirections)){
+        read_Data();
+    //}
     QThread::sleep(1); // 1 seg de pause TEMPO EM QUE O ROBÔ FICA GIRANDO
-    for(int i=1; i<11;i++){
-        write_buf[i] = C0; // ZERA CAMPOS DO BUFFER DE ESCRITA QUE NÃO SÃO DE INTERESSE
+    for(int i=0; i<11;i++){
+        if(i==0){
+            write_buf[0] = (unsigned char) (249); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
+            //write_buf[0] = converter_write(249);
+        }
+        else{
+            write_buf[i] = C0; // ZERA CAMPOS DO BUFFER DE ESCRITA QUE NÃO SÃO DE INTERESSE
+        }
     }
-    //write_buf[2*index + 1] = converter_write(0); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
-    //write_buf[2*index + 2] = converter_write(0); // VELOCIDADE DIREITA DO ROBÔ(ID)
-    serialPort->flush();
+    //serialPort->flush();
     write_Data(); // comando para parar
     //serialPort->waitForReadyRead(50);
-    QThread::msleep(50); // 1 ms de pause
-    serialPort->flush();
-    read_Data();
-    read_Data();
+    //QThread::msleep(50); // 1 ms de pause
+    //if(this->serialPort->clear(QSerialPort::AllDirections)){
+        read_Data();
+    //}
 }
 
 
