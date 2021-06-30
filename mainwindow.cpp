@@ -90,7 +90,6 @@ void MainWindow::connectToSerial(){
         ui->Connect_Disconect->setText("Desconectar");
 
         flag_comunicacao = !flag_comunicacao; // altera o flag de comunicação 0 - SemComunicação e 1 - ComComunicação
-
         return;
     }
     ui->label->setText("Falha ao tentar conetar");
@@ -167,8 +166,28 @@ void MainWindow::read_Data()
     //const QByteArray datareceive = this->serialPort->readAll();
     if (flag_comunicacao)
     {
-        while(this->serialPort->readBufferSize()<10){}
-        if(this->serialPort->bytesAvailable()==11){
+        /*
+        const QString read_id2 =(QString)'10';
+        while(this->serialPort->readBufferSize()<1){} //Para aguardar o buffer chegar
+        while(this->serialPort->bytesAvailable()>=1 && read_id2 != converter_write (20)){
+                QByteArray read_id= this->serialPort->read(1);
+                const QString read_id2 = read_id;
+                //qint64 teste=this->serialPort->readBufferSize();
+                //ui->lcdNumber_id_r->display((int)teste);
+                //if(read_id2 == '20'){
+                    //ui->lcdNumber_id_r->display(read_id2);
+                //}
+           }
+        */
+        while(this->serialPort->readBufferSize()<11){}
+
+        if(this->serialPort->bytesAvailable()>=11){
+            //QByteArray read_id = this->serialPort->read(1);
+            //const QString read_id2 = read_id;
+            //if(read_id2 == '250'){
+            //    ui->lcdNumber_id_r->display((int)80);
+           // }
+           //wa read_buf[0]=(const char)read_id2;
             QByteArray read_buf = this->serialPort->read(11);
             //const QString texto = read_buf;
             //ui->lineEdit_2->setText(texto);
@@ -193,14 +212,15 @@ void MainWindow::read_Data()
 
 
 
-
+            /*
             if(int(read_buf.at(0) >= 0)){
                 ui->lcdNumber_id_r->display((int)read_buf.at(0));
             }
             else{
                 ui->lcdNumber_id_r->display(-(128 + (int)read_buf.at(0)));
             }
-
+            */
+            ui->lcdNumber_id_r->display(converter_read(read_buf.at(0)));
             ui->lcdNumber_L1_r->display(converter_read(read_buf.at(1)));
             ui->lcdNumber_R1_r->display(converter_read(read_buf.at(2)));
             ui->lcdNumber_L2_r->display(converter_read(read_buf.at(3)));
@@ -211,6 +231,12 @@ void MainWindow::read_Data()
             ui->lcdNumber_R4_r->display(converter_read(read_buf.at(8)));
             ui->lcdNumber_L5_r->display(converter_read(read_buf.at(9)));
             ui->lcdNumber_R5_r->display(converter_read(read_buf.at(10)));
+
+
+            while(this->serialPort->bytesAvailable()>=1){
+                QByteArray lixo = this->serialPort->read(1); // limpar buffer de forma escrota
+            }
+
 
             //Atualização do plot
             int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
@@ -387,7 +413,7 @@ void MainWindow::on_Select_Robot_activated(int index)
 void MainWindow::on_Girar_clicked()
 {
     //int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
-    write_buf[0] = (unsigned char) (249); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
+    write_buf[0] = (unsigned char) (250); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
     //write_buf[0] = converter_write(249);
     for(int i=0; i<5;i++){
         write_buf[(2*i) + 1] = converter_write(100); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
@@ -399,13 +425,13 @@ void MainWindow::on_Girar_clicked()
     //serialPort->waitForReadyRead(50);
     //QThread::msleep(50); // 1 ms de pause
     //if(this->serialPort->clear(QSerialPort::AllDirections)){
-        read_Data();
+    read_Data();
     //}
     QThread::sleep(1); // 1 seg de pause TEMPO EM QUE O ROBÔ FICA GIRANDO
     for(int i=0; i<11;i++){
         if(i==0){
-            write_buf[0] = (unsigned char) (249); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
-            //write_buf[0] = converter_write(249);
+            write_buf[0] = (unsigned char) (250); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
+            //write_buf[0] = converter_write(250);
         }
         else{
             write_buf[i] = C0; // ZERA CAMPOS DO BUFFER DE ESCRITA QUE NÃO SÃO DE INTERESSE
@@ -416,7 +442,7 @@ void MainWindow::on_Girar_clicked()
     //serialPort->waitForReadyRead(50);
     //QThread::msleep(50); // 1 ms de pause
     //if(this->serialPort->clear(QSerialPort::AllDirections)){
-        read_Data();
+    read_Data();
     //}
 }
 
