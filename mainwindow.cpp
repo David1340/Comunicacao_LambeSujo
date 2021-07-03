@@ -179,16 +179,20 @@ void MainWindow::read_Data()
                 //}
            }
         */
-        while(this->serialPort->readBufferSize()<11){}
+        while(this->serialPort->readBufferSize()<11){serialPort->waitForReadyRead(3);}
 
-        if(this->serialPort->bytesAvailable()>=11){
-            //QByteArray read_id = this->serialPort->read(1);
-            //const QString read_id2 = read_id;
-            //if(read_id2 == '250'){
-            //    ui->lcdNumber_id_r->display((int)80);
-           // }
-           //wa read_buf[0]=(const char)read_id2;
-            QByteArray read_buf = this->serialPort->read(11);
+        if(this->serialPort->bytesAvailable()>=11 ){
+            ui->lcdNumber_id_r->display((int)this->serialPort->bytesAvailable());
+            QByteArray read_buf = this->serialPort->readAll();
+            //const QString read_id2 =QByteArray::data( read_buf(0));
+            //if(read_buf(0) =='5'){
+              //  ui->lcdNumber_id_r->display((int)5);
+            //}
+            //ui->lcdNumber_id_r->display((int)read_buf.size());
+            //read_buf[0]=(const char)read_id2;
+
+
+            //QByteArray read_buf = this->serialPort->read(10);
             //const QString texto = read_buf;
             //ui->lineEdit_2->setText(texto);
 
@@ -220,7 +224,7 @@ void MainWindow::read_Data()
                 ui->lcdNumber_id_r->display(-(128 + (int)read_buf.at(0)));
             }
             */
-            ui->lcdNumber_id_r->display(converter_read(read_buf.at(0)));
+            //ui->lcdNumber_id_r->display(converter_read(read_buf.at(0)));
             ui->lcdNumber_L1_r->display(converter_read(read_buf.at(1)));
             ui->lcdNumber_R1_r->display(converter_read(read_buf.at(2)));
             ui->lcdNumber_L2_r->display(converter_read(read_buf.at(3)));
@@ -233,9 +237,7 @@ void MainWindow::read_Data()
             ui->lcdNumber_R5_r->display(converter_read(read_buf.at(10)));
 
 
-            while(this->serialPort->bytesAvailable()>=1){
-                QByteArray lixo = this->serialPort->read(1); // limpar buffer de forma escrota
-            }
+
 
 
             //Atualização do plot
@@ -413,7 +415,7 @@ void MainWindow::on_Select_Robot_activated(int index)
 void MainWindow::on_Girar_clicked()
 {
     //int index = ui->Select_Robot->currentIndex(); //Seleciona o Index
-    write_buf[0] = (unsigned char) (250); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
+    write_buf[0] = (unsigned char) (46); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
     //write_buf[0] = converter_write(249);
     for(int i=0; i<5;i++){
         write_buf[(2*i) + 1] = converter_write(100); // VELOCIDADE ESQUERDA DO ROBÔ(ID)
@@ -425,12 +427,11 @@ void MainWindow::on_Girar_clicked()
     //serialPort->waitForReadyRead(50);
     //QThread::msleep(50); // 1 ms de pause
     //if(this->serialPort->clear(QSerialPort::AllDirections)){
-    read_Data();
-    //}
+    //read_Data();
     QThread::sleep(1); // 1 seg de pause TEMPO EM QUE O ROBÔ FICA GIRANDO
     for(int i=0; i<11;i++){
         if(i==0){
-            write_buf[0] = (unsigned char) (250); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
+            write_buf[0] = (unsigned char) (46); // ID DO ROBÔ QUE RECEBERÁ A MENSAGEM
             //write_buf[0] = converter_write(250);
         }
         else{
@@ -442,7 +443,7 @@ void MainWindow::on_Girar_clicked()
     //serialPort->waitForReadyRead(50);
     //QThread::msleep(50); // 1 ms de pause
     //if(this->serialPort->clear(QSerialPort::AllDirections)){
-    read_Data();
+    //read_Data();
     //}
 }
 
